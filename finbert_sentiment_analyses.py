@@ -29,15 +29,12 @@ tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-tone')
 nlp = pipeline("sentiment-analysis", model=finbert, tokenizer=tokenizer)
 
 df=df[df[col].notnull()]
-   
-sentences = [str(x) for x in df[col]]
+df.reset_index(drop=True,inplace=True)
 
+for index,row in df.iterrows():
+    text=str(row[col])
+    sentiment=nlp(text)
+    df.loc[index,'label']=sentiment[0]['label']
+    df.loc[index,'score']=sentiment[0]['score']
 
-results = nlp(sentences)
-print(results)  
-
-results2 = pd.DataFrame.from_records(results)
-
-final_results=pd.concat([df,results2],axis=1)
-
-final_results.to_csv(folder+"\\"+output_file)
+df.to_csv(folder+"\\"+output_file,index=False)
